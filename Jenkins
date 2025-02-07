@@ -9,7 +9,23 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/arya-anil19/quiz-app.git'  // Updated repo URL
+                git 'https://github.com/arya-anil19/quiz-app.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    sh "npm install"
+                }
+            }
+        }
+
+        stage('Build React App') {
+            steps {
+                script {
+                    sh "npm run build"
+                }
             }
         }
 
@@ -32,12 +48,7 @@ pipeline {
         stage('Deploy Application') {
             steps {
                 script {
-                    sh """
-                    docker pull $DOCKER_REGISTRY/$IMAGE_NAME:latest
-                    docker stop quiz-app || true
-                    docker rm quiz-app || true
-                    docker run -d -p 3000:3000 --name quiz-app $DOCKER_REGISTRY/$IMAGE_NAME:latest
-                    """
+                    sh "docker run -d -p 3000:3000 --name quiz-app $DOCKER_REGISTRY/$IMAGE_NAME:latest"
                 }
             }
         }
