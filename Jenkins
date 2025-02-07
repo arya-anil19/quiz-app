@@ -24,4 +24,22 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
-                    sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME
+                    sh "docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest"
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                script {
+                    sh """
+                    docker pull $DOCKER_REGISTRY/$IMAGE_NAME:latest
+                    docker stop quiz-app || true
+                    docker rm quiz-app || true
+                    docker run -d -p 3000:3000 --name quiz-app $DOCKER_REGISTRY/$IMAGE_NAME:latest
+                    """
+                }
+            }
+        }
+    }
+}
